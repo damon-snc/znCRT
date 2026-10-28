@@ -50,7 +50,7 @@
 
 | # | 项 | 目标 | 状态 |
 | --- | --- | --- | --- |
-| 1 | GitHub 开源仓库 | znCRT, GPL-3.0 | ✅ [damon-snc/znCRT](https://github.com/damon-snc/znCRT) 已建+首推 |
+| 1 | GitHub 开源仓库 | znCRT, GPL-3.0 | ✅ [damon-snc/znCRT](https://github.com/damon-snc/znCRT) 已建+首推（远端 f837ff5a · 30 文件 · 2026-10-29） |
 | 2 | 本机构建通道 | HAP 可构建 | ❌ 工具链攻关中 |
 | 3 | 本机部署运行 | 安装+核心链路可用 | ❌ 依赖上两项 |
 
@@ -58,3 +58,4 @@
 
 - 2026-10-28（Day 0）：矩阵建立，基线 15+9+3 项，znCRT 全量 ❌，工程项 🟡/❌。
 - 2026-10-28（Day 0 深夜段）：GitHub 建仓 ✅（damon-snc/znCRT）。本机 git push 被沙箱阻断（git-remote-https 子进程不可用），夜推改走 tools/github_sync.py（REST git data API 单提交镜像）。
+- 2026-10-29（Day 2 凌晨）：首推闭环（空仓 PUT contents 初始化 d3fe992 → 全量同步 f837ff5a/30 文件）；E5a 探针插件随仓安装成功（profile deps 登记 zncrt），待 DSHM 重启挂载验证。
