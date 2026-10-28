@@ -1,12 +1,16 @@
 {
   "name": "zncrt",
-  "version": "0.1.0-e5a",
-  "description": "znCRT — SSH/SFTP/DB 客户端对标 hexhub（HarmonyOS PC）；本版本为 ADR-0003 E5a/E5b 探针：挂载即开 127.0.0.1:8978",
+  "version": "0.2.0-e5bcd",
+  "description": "znCRT — SSH/SFTP/DB 客户端对标 hexhub（HarmonyOS PC）；E5b/c/d 三合一探针：HTTP 端口 + ssh2/ws 模块解析 + SSH 实弹",
   "type": "module",
   "main": "src/host.js",
   "license": "GPL-3.0",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "ssh2": "^1.17.0",
+    "ws": "^8.18.0"
   },
   "dsh": {
     "manifestVersion": 1

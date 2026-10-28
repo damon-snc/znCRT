@@ -17,3 +17,5 @@
 [znCRT] 127.0.0.1 "GET /vendor/xterm/xterm.css HTTP/1.1" 200 -
 [znCRT] 127.0.0.1 "GET /vendor/../engine/server.py HTTP/1.1" 404 -
 [znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
