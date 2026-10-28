@@ -41,3 +41,10 @@
 
 - Channel 之外的消息族（SFTP 文件操作、DB 查询流）——可能在按需加载的子 bundle（需枚举 /assets/ 清单或跑起来抓流量）。
 - 桌面 daemon 的端口/发现机制（hexhub.cn 首页 manifest 与 JS 均未露）。
+
+## 第三层（2026-10-29 凌晨）：全资产枚举 + 领域模型
+
+- 首页资产清单 12 个 JS 全量拉取（$HOME/hexhub-*.js，不入库）：asset/axios/crypto/dexie/pako/pinia/vue-i18n/vue/vuetify/rpc/index + css。
+- **领域枚举出土**（asset bundle）：连接类型全景与 18+ DB 引擎清单 → 已升版 docs/01 基线；凭据字段级加密模型（password/privateKey/jumpServer.*）→ znCRT 本地存储安全对齐口径。
+- 每类型 Query 类分立（SSH/SSHTunnel/Shell/Serial/Telnet/RDP/SSHPasswordPair/SSHPrivateKey 各有独立查询构建器）⇒ 前端按连接类型组织会话与配置。
+- vue-i18n bundle 为纯 runtime（3.7KB），语言包内联在 asset/index——功能词汇提取待续。

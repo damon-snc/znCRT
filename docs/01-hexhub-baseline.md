@@ -1,4 +1,19 @@
-# hexhub 功能基线 v0（对标基准）
+# hexhub 功能基线
+
+> v2（2026-10-29 凌晨升版）：新增「新版发布件连接类型全景」——Day 0 版以老仓库 README 为源，低估了新版能力面。
+> 来源：① 老仓库 README 解码（Day 0）；② hexhub.cn 发布件 bundle REA（Day 2 凌晨，见 docs/04）。
+
+## 新版（hexhub.cn 发布件）连接类型全景（REA 实测枚举）
+
+**协议/连接类**：SSH、SSHPasswordPair、SSHPrivateKey、SSHTunnel（跳板机：jumpServer.password/privateKey 双字段模型）、Telnet、Serial（串口）、RDP、VNC、Shell、FTP、HTTP(S)、Cmd/CmdSudo/QuickCmd/QuickCmdGroup、Docker、DockerRegistry、RepositorySource、**LLMProviderConfig**（AI 提供方配置为一等连接类型）、Hotkey、Setting、DBQuery、Dir。
+
+**数据库引擎（18+，国产库全覆盖）**：MySQL、PostgreSQL、Redis、MongoDB、SqlServer、Oracle、Sqlite、ClickHouse、MariaDB、TiDB、KingbaseES（人大金仓）、OpenGauss、Doris、OceanBase、PolarDB、Dameng（达梦）、DUCKDB、Http(数据源)。
+
+**凭据安全模型**（bundle 实测）：存储时字段级加密 `encryptFields(["password","privateKey","jumpServer.password","jumpServer.privateKey"])`，读取时解密——znCRT 对齐口径：本地凭据必须加密落盘（WebCrypto/crypto-js 等效）。
+
+**排序组**（Object.freeze 显示顺序）：[5,11]、[0,2,16,17,18,3,7,4,13,12,15,20]——连接列表的分组显示顺序。
+
+## SSH 管理器（老仓库 README 基线，15 项） v0（对标基准）
 
 > 来源：EdikKing/hexhub master 分支 README（base64 blob 解码，2026-10-28 实测取证）+ 仓库结构实测。
 > 待补项标 ⏳：官网 hexhub.cn（当前 TLS 证书过期，需 `curl -k` 或快照）、发布件逆向、Redis/PG/Mongo 细节。

@@ -59,3 +59,4 @@
 - 2026-10-28（Day 0）：矩阵建立，基线 15+9+3 项，znCRT 全量 ❌，工程项 🟡/❌。
 - 2026-10-28（Day 0 深夜段）：GitHub 建仓 ✅（damon-snc/znCRT）。本机 git push 被沙箱阻断（git-remote-https 子进程不可用），夜推改走 tools/github_sync.py（REST git data API 单提交镜像）。
 - 2026-10-29（Day 2 凌晨）：首推闭环（空仓 PUT contents 初始化 d3fe992 → 全量同步 f837ff5a/30 文件）；E5a 探针插件随仓安装成功（profile deps 登记 zncrt），待 DSHM 重启挂载验证。
+- 2026-10-29（Day 2 凌晨续）：**基线升版 v2**（hexhub 新版连接类型全景：18+ DB 引擎/Telnet/RDP/VNC/Serial/LLMProviderConfig/跳板机双字段模型/凭据字段级加密）——DB 区矩阵口径按新版扩展，但 P0/P1 优先级不变（SSH 主链路优先）；E5b/c/d 探针 v0.2.0 已上膛待重启。
