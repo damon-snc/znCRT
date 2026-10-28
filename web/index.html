@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>znCRT · 对标 hexhub</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+    background: #0d1117; color: #c9d1d9;
+    font-family: "Cascadia Code", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
+  }
+  header { padding: 18px 24px; border-bottom: 1px solid #21262d; display: flex; align-items: baseline; gap: 12px; }
+  h1 { font-size: 20px; margin: 0; color: #58a6ff; }
+  h1 .zn { color: #3fb950; }
+  header small { color: #8b949e; }
+  main { flex: 1; padding: 24px; }
+  .card { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 16px 20px; max-width: 720px; }
+  .cap { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .cap span { border: 1px solid #30363d; border-radius: 999px; padding: 2px 12px; font-size: 13px; }
+  .off { color: #f85149; border-color: #f8514933; }
+  pre { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px; overflow: auto; font-size: 12px; }
+  footer { padding: 12px 24px; border-top: 1px solid #21262d; color: #8b949e; font-size: 12px; }
+  a { color: #58a6ff; text-decoration: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="zn">zn</span>CRT</h1>
+  <small>对标 hexhub · 开源鸿蒙 SSH/SFTP/DB 客户端 · GPL-3.0</small>
+</header>
+<main>
+  <div class="card">
+    <div>引擎状态（<code>GET /api/status</code>）：</div>
+    <pre id="status">loading…</pre>
+    <div class="cap" id="caps"></div>
+  </div>
+</main>
+<footer>
+  Day 1 首个可运行件（2026-10-28 夜）· 差异矩阵见
+  <a href="https://github.com/damon-snc/znCRT">damon-snc/znCRT</a> · 目标：本机部署，与 hexhub 一模一样
+</footer>
+<script>
+fetch('/api/status').then(r => r.json()).then(s => {
+  document.getElementById('status').textContent = JSON.stringify(s, null, 2);
+  const caps = document.getElementById('caps');
+  for (const [k, v] of Object.entries(s.capabilities)) {
+    const el = document.createElement('span');
+    el.className = v ? 'on' : 'off';
+    el.textContent = (v ? '✅ ' : '❌ ') + k;
+    caps.appendChild(el);
+  }
+}).catch(e => { document.getElementById('status').textContent = 'engine unreachable: ' + e; });
+</script>
+</body>
+</html>

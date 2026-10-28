@@ -1,0 +1,16 @@
+node_modules/
+.nuxt/
+.output/
+dist/
+oh_modules/
+.hvigor/
+.cxx/
+*.har
+*.hap
+*.log
+.DS_Store
+# pip/C 扩展 vendor 树不可入库（ADR-0003 评审口径）
+engine/vendor/
+# hexhub.cn 闭源件取证/反编译产物永不入库（ADR-0002 r2 GPL 分流）
+hexhub-*
+engine/.engine.pid
