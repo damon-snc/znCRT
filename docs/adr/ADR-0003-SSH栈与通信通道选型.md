@@ -52,6 +52,11 @@
 | E5e | WS 终端回显通道 + xterm.js attach（P0 终端链路纵向打通） | 浏览器按键→远端回显 | 2 夜 | — |
 | E5f | 性能预算实测（建议-4：JS 栈不豁免）：SFTP ≥5MB/s（dd 100MB）、回显 P95≤80ms、4 路并发不劣化 | 三项全绿 | 2 夜 | 达不到→列优化项重测一轮，仍败则 A' 标注性能风险转 Damon |
 
+**执行进度（2026-10-29 凌晨）**：
+- E5a 安装段 ✅（`pnpm add github:damon-snc/znCRT#main` 两轮成功：0.1.0-e5a → 0.2.0-e5bcd；profile deps 登记 `zncrt`；本地路径 spec 实测被拒，失败信息反哺支持格式 `github:owner/repo#分支&path:/子目录`）；**挂载验证待 DSHM 重启**。
+- E5c 前置 ✅：ssh2@^1.17 + ws@^8.18 随插件安装落位 `profiles/ondevice/node_modules/`（optional 原生件未拖垮安装，fail-soft 符合预期）。
+- E5b/c/d 探针已合并进 v0.2.0-e5bcd（一次重启验证三步：/api/hello、/api/modules、POST /api/ssh）。
+
 **转正条件**：E5a–f 全绿 + Damon 拍板（路线甲）⇒ ADR-0003 转「已接受」，A' 定案并启动工程实现；E5 任一步失败按降级口径如实重议。
 
 ## 分发形态（r2 修正：删除 E2' 前的"本机 execve 直接跑"旧文）
