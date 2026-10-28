@@ -30,10 +30,27 @@
 | [docs/adr/](docs/adr/) | 架构决策记录（ADR） |
 | [journal/](journal/) | 每夜作战日志 |
 
-## 状态
+## 状态（2026-10-29 凌晨）
 
-Day 0 立项（2026-10-28）。阵地已立，路线决策见 ADR-0002（技术路线：ArkTS 原生 / WebView 混合 / 构建流水线）。
+| 前线 | 进展 |
+| --- | --- |
+| 架构路线 | ADR-0002 已接受（两步走：插件引擎→ArkTS HAP）；ADR-0003 拍板路线甲（DSH 插件 + ssh2 纯 JS） |
+| P0 SSH 链路 | E5 三合一探针插件已装入本机 profile（HTTP 端口 / ssh2 模块解析 / SSH 实弹），待一次 DSHM 重启验证 |
+| P0 终端体验 | xterm.js 6.0 终端壳上线（连接表单 + 状态探针 + 实弹按钮） |
+| P0 历史连接 | IndexedDB + WebCrypto AES-GCM 字段级加密存储（对标 hexhub 同构位） |
+| 对标基线 | hexhub 基线 v2：18+ DB 引擎、全协议连接类型、凭据加密模型（REA 三层） |
+
+## 快速开始（本 HarmonyOS PC）
+
+```bash
+# 1) 演示引擎（python3 stdlib，无依赖）
+./engine/ctl.sh start          # → http://127.0.0.1:8977 终端壳
+# 2) E5 探针插件（需先重启一次 DSHM 挂载）
+curl http://127.0.0.1:8978/api/hello     # E5b 端口探针
+curl http://127.0.0.1:8978/api/modules   # E5c ssh2/ws 解析
+#    E5d 实弹：浏览器开 8977 → 填服务器 → 点「连接」
+```
 
 ## License
 
-GPL-3.0（与对标项目 hexhub 同源对齐）
+GPL-3.0（与对标项目 hexhub 同源对齐）。第三方组件见 [docs/NOTICE.md](docs/NOTICE.md)。
