@@ -20,3 +20,5 @@
 [znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
 [znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
 [znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
