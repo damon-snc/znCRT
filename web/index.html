@@ -1,57 +1,114 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>znCRT · 对标 hexhub</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>znCRT · 终端</title>
+<link rel="stylesheet" href="/vendor/xterm/xterm.css">
 <style>
-  :root { color-scheme: dark; }
-  body {
-    margin: 0; min-height: 100vh; display: flex; flex-direction: column;
-    background: #0d1117; color: #c9d1d9;
-    font-family: "Cascadia Code", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d;
+    --fg: #c9d1d9; --accent: #58a6ff; --ok: #3fb950; --err: #f85149;
   }
-  header { padding: 18px 24px; border-bottom: 1px solid #21262d; display: flex; align-items: baseline; gap: 12px; }
-  h1 { font-size: 20px; margin: 0; color: #58a6ff; }
-  h1 .zn { color: #3fb950; }
-  header small { color: #8b949e; }
-  main { flex: 1; padding: 24px; }
-  .card { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 16px 20px; max-width: 720px; }
-  .cap { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-  .cap span { border: 1px solid #30363d; border-radius: 999px; padding: 2px 12px; font-size: 13px; }
-  .off { color: #f85149; border-color: #f8514933; }
-  pre { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px; overflow: auto; font-size: 12px; }
-  footer { padding: 12px 24px; border-top: 1px solid #21262d; color: #8b949e; font-size: 12px; }
-  a { color: #58a6ff; text-decoration: none; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font: 13px/1.5 -apple-system, "Segoe UI", "Noto Sans SC", sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 14px; font-weight: 600; color: var(--accent); }
+  header .pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); color: var(--fg); }
+  header .pill.on { color: var(--ok); border-color: var(--ok); }
+  #connbar { display: flex; gap: 6px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  #connbar input { background: var(--bg); border: 1px solid var(--border); color: var(--fg); border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+  #connbar input:focus { outline: none; border-color: var(--accent); }
+  #host { width: 180px; } #user { width: 110px; } #pass { width: 140px; }
+  #connbar button { background: #21262d; color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  #connbar button:hover { border-color: var(--accent); color: var(--accent); }
+  #connbar button:disabled { opacity: .5; cursor: not-allowed; }
+  #term-wrap { flex: 1; padding: 8px 10px; min-height: 0; }
+  #term { height: 100%; }
+  footer { padding: 4px 14px; font-size: 11px; color: #8b949e; background: var(--panel); border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
 <header>
-  <h1><span class="zn">zn</span>CRT</h1>
-  <small>对标 hexhub · 开源鸿蒙 SSH/SFTP/DB 客户端 · GPL-3.0</small>
+  <h1>znCRT</h1>
+  <span class="pill" id="pill-engine">engine ?</span>
+  <span class="pill" id="pill-plugin">plugin 8978 ?</span>
+  <span class="pill" id="pill-ssh2">ssh2 ?</span>
 </header>
-<main>
-  <div class="card">
-    <div>引擎状态（<code>GET /api/status</code>）：</div>
-    <pre id="status">loading…</pre>
-    <div class="cap" id="caps"></div>
-  </div>
-</main>
-<footer>
-  Day 1 首个可运行件（2026-10-28 夜）· 差异矩阵见
-  <a href="https://github.com/damon-snc/znCRT">damon-snc/znCRT</a> · 目标：本机部署，与 hexhub 一模一样
-</footer>
+
+<form id="connbar">
+  <input id="host" placeholder="主机 host" value="" autocomplete="off">
+  <input id="port" placeholder="端口" value="22013" style="width:70px" autocomplete="off">
+  <input id="user" placeholder="用户名" value="aiagent" autocomplete="off">
+  <input id="pass" type="password" placeholder="密码" autocomplete="off">
+  <button type="submit" id="btn-connect">连接</button>
+  <button type="button" id="btn-modules">引擎探针</button>
+</form>
+
+<div id="term-wrap"><div id="term"></div></div>
+<footer>znCRT · 对标 hexhub · <span id="uptime">—</span> · 凭证仅存内存，随会话销毁</footer>
+
+<script src="/vendor/xterm/xterm.js"></script>
 <script>
-fetch('/api/status').then(r => r.json()).then(s => {
-  document.getElementById('status').textContent = JSON.stringify(s, null, 2);
-  const caps = document.getElementById('caps');
-  for (const [k, v] of Object.entries(s.capabilities)) {
-    const el = document.createElement('span');
-    el.className = v ? 'on' : 'off';
-    el.textContent = (v ? '✅ ' : '❌ ') + k;
-    caps.appendChild(el);
+"use strict";
+const ENGINE = location.origin;                 // 8977（python 演示引擎）
+const PLUGIN = "http://127.0.0.1:8978";          // 8978（E5 插件，重启后挂载）
+
+const term = new Terminal({
+  cursorBlink: true, fontSize: 13, fontFamily: "Menlo, Consolas, 'Courier New', monospace",
+  theme: { background: "#0d1117", foreground: "#c9d1d9", cursor: "#58a6ff" },
+});
+term.open(document.getElementById("term"));
+function say(msg, cls) {
+  const c = cls === "err" ? "\x1b[31m" : cls === "ok" ? "\x1b[32m" : "\x1b[36m";
+  term.write(c + msg + "\x1b[0m\r\n");
+}
+say("znCRT terminal shell v2 — xterm.js " + (Terminal.Version || "6.x"));
+say("等待引擎探针结果……");
+
+async function refreshStatus() {
+  const set = (id, text, on) => { const el = document.getElementById(id); el.textContent = text; el.classList.toggle("on", !!on); };
+  try {
+    const s = await (await fetch(ENGINE + "/api/status")).json();
+    set("pill-engine", "engine " + s.version, true);
+    document.getElementById("uptime").textContent = "uptime " + s.uptime_sec + "s";
+  } catch { set("pill-engine", "engine ✗", false); }
+  try {
+    const m = await (await fetch(PLUGIN + "/api/modules")).json();
+    set("pill-plugin", "plugin 8978 ✓", true);
+    set("pill-ssh2", m.modules && m.modules.ssh2 && m.modules.ssh2.ok ? "ssh2 ✓" : "ssh2 ✗", m.modules && m.modules.ssh2 && m.modules.ssh2.ok);
+    say("插件在线：E5c 模块解析 ssh2=" + (m.modules.ssh2.ok ? "OK" : m.modules.ssh2.error), m.modules.ssh2.ok ? "ok" : "err");
+  } catch {
+    set("pill-plugin", "plugin 8978 ✗", false);
+    say("E5 插件未挂载（127.0.0.1:8978 不通）——待 DSHM 重启后生效", "err");
   }
-}).catch(e => { document.getElementById('status').textContent = 'engine unreachable: ' + e; });
+}
+
+document.getElementById("btn-modules").addEventListener("click", refreshStatus);
+
+document.getElementById("connbar").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = {
+    host: document.getElementById("host").value.trim(),
+    port: Number(document.getElementById("port").value || 22),
+    user: document.getElementById("user").value.trim(),
+    pass: document.getElementById("pass").value,
+    cmd: "whoami && uname -a && hostname",
+  };
+  if (!body.host || !body.user || !body.pass) { say("主机/用户名/密码必填", "err"); return; }
+  say("→ SSH 实弹（E5d）：" + body.user + "@" + body.host + ":" + body.port + " …");
+  const btn = document.getElementById("btn-connect"); btn.disabled = true;
+  try {
+    const r = await fetch(PLUGIN + "/api/ssh", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (j.ok) { say(j.output, "ok"); say("SMOKE_OK · exit=" + j.exitCode, "ok"); }
+    else { say("SSH 失败 [" + (j.stage || r.status) + "] " + (j.error || ""), "err"); }
+  } catch (err) { say("插件通道不可达（需重启 DSHM 挂载 E5 探针）：" + err, "err"); }
+  btn.disabled = false;
+});
+
+refreshStatus();
+setInterval(refreshStatus, 15000);
 </script>
 </body>
 </html>
