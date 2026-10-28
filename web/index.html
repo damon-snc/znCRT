@@ -45,10 +45,24 @@
   <button type="button" id="btn-modules">引擎探针</button>
 </form>
 
+<form id="historybar" style="display:flex;gap:6px;padding:6px 14px;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center">
+  <input id="master" type="password" placeholder="主口令（首次=设置）" style="width:150px;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:4px 8px;font-size:12px">
+  <button type="button" id="btn-unlock" style="background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">解锁</button>
+  <button type="button" id="btn-save" disabled style="background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">保存连接</button>
+  <select id="hist-list" style="background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:4px 6px;font-size:12px;max-width:220px"><option value="">— 历史（先解锁） —</option></select>
+  <button type="button" id="btn-load" disabled style="background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">载入</button>
+  <button type="button" id="btn-del" disabled style="background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">删除</button>
+  <span id="hist-state" style="font-size:11px;color:#8b949e"></span>
+</form>
+
 <div id="term-wrap"><div id="term"></div></div>
 <footer>znCRT · 对标 hexhub · <span id="uptime">—</span> · 凭证仅存内存，随会话销毁</footer>
 
 <script src="/vendor/xterm/xterm.js"></script>
+<script type="module">
+import { unlock, isUnlocked, hasSalt, saveConnection, listConnections, decryptPassword, deleteConnection } from "/crypto-store.js";
+window.znStore = { unlock, isUnlocked, hasSalt, saveConnection, listConnections, decryptPassword, deleteConnection };
+</script>
 <script>
 "use strict";
 const ENGINE = location.origin;                 // 8977（python 演示引擎）
@@ -109,6 +123,56 @@ document.getElementById("connbar").addEventListener("submit", async (e) => {
 
 refreshStatus();
 setInterval(refreshStatus, 15000);
+
+/* ===== P0 #11 历史连接（加密存储，对标 hexhub 前端 Dexie+crypto 模型） ===== */
+const $ = (id) => document.getElementById(id);
+function histState(msg) { $("hist-state").textContent = msg; }
+async function refreshHistory() {
+  const sel = $("hist-list");
+  if (!window.znStore || !znStore.isUnlocked()) { sel.innerHTML = '<option value="">— 历史（先解锁） —</option>'; return; }
+  const list = await znStore.listConnections();
+  sel.innerHTML = list.length
+    ? list.map(r => `<option value="${r.id}">${r.name} :${r.port}</option>`).join("")
+    : '<option value="">（空）</option>';
+  $("btn-load").disabled = $("btn-del").disabled = !list.length;
+}
+$("btn-unlock").addEventListener("click", async () => {
+  const v = $("master").value;
+  if (!v) { histState("主口令不能为空"); return; }
+  try {
+    await znStore.unlock(v, znStore.hasSalt() ? localStorage.getItem("zncrt-salt") : null);
+    $("btn-save").disabled = false;
+    histState(znStore.hasSalt() ? "已解锁（AES-GCM）" : "主口令已设置（盐已生成）");
+    await refreshHistory();
+  } catch (e) { histState("解锁失败：" + e.message); }
+});
+$("btn-save").addEventListener("click", async () => {
+  const entry = { host: $("host").value.trim(), port: $("port").value, user: $("user").value.trim(), pass: $("pass").value };
+  if (!entry.host || !entry.user) { histState("主机/用户名必填"); return; }
+  try {
+    await znStore.saveConnection(entry);
+    histState("已保存（密码字段加密落库）");
+    $("master").value = ""; // 口令即用即清
+    await refreshHistory();
+  } catch (e) { histState("保存失败：" + e.message); }
+});
+$("btn-load").addEventListener("click", async () => {
+  const id = Number($("hist-list").value);
+  if (!id) return;
+  const rec = (await znStore.listConnections()).find(r => r.id === id);
+  if (!rec) return;
+  $("host").value = rec.host; $("port").value = rec.port; $("user").value = rec.user;
+  const pass = await znStore.decryptPassword(rec);
+  $("pass").value = pass || "";
+  histState(pass ? "已载入（密码已解密）" : "已载入（密码解密失败：主口令不符？）");
+});
+$("btn-del").addEventListener("click", async () => {
+  const id = Number($("hist-list").value);
+  if (!id) return;
+  await znStore.deleteConnection(id);
+  histState("已删除"); await refreshHistory();
+});
+if (window.znStore) refreshHistory(); else setTimeout(refreshHistory, 500); // 等 module 注入
 </script>
 </body>
 </html>

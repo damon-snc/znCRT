@@ -44,7 +44,10 @@ class Handler(BaseHTTPRequestHandler):
                        json.dumps(payload, ensure_ascii=False).encode())
         else:
             rel = self.path.lstrip("/")
-            if rel.startswith(("vendor/", "assets/")):
+            # 根级静态文件（无子目录，白名单后缀）与 vendor/assets 子树
+            root_level = "/" not in rel and rel.rsplit(".", 1)[-1] in (
+                "js", "css", "html", "json", "svg", "png", "webmanifest")
+            if rel.startswith(("vendor/", "assets/")) or root_level:
                 target = (WEB / rel).resolve()
                 if str(target).startswith(str(WEB.resolve()) + os.sep) and target.is_file():
                     ctype = {

@@ -27,3 +27,9 @@
 [znCRT] 127.0.0.1 "GET /vendor/xterm/xterm.js HTTP/1.1" 200 -
 [znCRT] 127.0.0.1 "GET /vendor/xterm/xterm.css HTTP/1.1" 200 -
 [znCRT] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] engine v0.1.0-day1 listening on http://127.0.0.1:8977
+[znCRT] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /crypto-store.js HTTP/1.1" 200 -
+[znCRT] 127.0.0.1 "GET /../engine/server.py HTTP/1.1" 404 -
