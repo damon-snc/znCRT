@@ -52,10 +52,12 @@
 | E5e | WS 终端回显通道 + xterm.js attach（P0 终端链路纵向打通） | 浏览器按键→远端回显 | 2 夜 | — |
 | E5f | 性能预算实测（建议-4：JS 栈不豁免）：SFTP ≥5MB/s（dd 100MB）、回显 P95≤80ms、4 路并发不劣化 | 三项全绿 | 2 夜 | 达不到→列优化项重测一轮，仍败则 A' 标注性能风险转 Damon |
 
-**执行进度（2026-10-29 凌晨）**：
-- E5a 安装段 ✅（`pnpm add github:damon-snc/znCRT#main` 两轮成功：0.1.0-e5a → 0.2.0-e5bcd；profile deps 登记 `zncrt`；本地路径 spec 实测被拒，失败信息反哺支持格式 `github:owner/repo#分支&path:/子目录`）；**挂载验证待 DSHM 重启**。
-- E5c 前置 ✅：ssh2@^1.17 + ws@^8.18 随插件安装落位 `profiles/ondevice/node_modules/`（optional 原生件未拖垮安装，fail-soft 符合预期）。
-- E5b/c/d 探针已合并进 v0.2.0-e5bcd（一次重启验证三步：/api/hello、/api/modules、POST /api/ssh）。
+**执行进度（2026-10-29 凌晨 → 10-31 晨更）**：
+- E5a 安装段 ✅（`pnpm add github:damon-snc/znCRT#main` 两轮成功：0.1.0-e5a → 0.2.0-e5bcd；profile deps 登记 `zncrt`；本地路径 spec 实测被拒，失败信息反哺支持格式 `github:owner/repo#分支&path:/子目录`）。
+- **E5a 挂载段首次失败（10-31 晨复盘）**：DSHM 在 10-29~10-31 间确实重启过（旁证：python 引擎 8977 随之死亡），但 8978 未起——plugin_manager 全量 243 条挂载树无 zncrt。根因：**v0.2.0 manifest 缺 `dsh.bundle` 声明**（对照 dsh-better-sidebar 先例），安装器按普通依赖处理、未写入 `dsh.profile.bundles` ⇒ 重启后无从挂载。属 Lead 先例研究不彻底，非通道缺陷——探针机制首战即抓到真 bug。
+- **修复 v0.2.1（b483b98）**：补 `dsh.bundle.patch` 声明 + 仓库根 cordis.patch.yml（`insert: zncrt-engine` 行）；重装实测 **`dsh.profile.bundles` 尾端登记 `zncrt`** + patch 随包落位 + 安装器回执升级"bundle 型插件已登记"。
+- E5c 前置 ✅：ssh2@^1.17 + ws@^8.18 随插件安装落位（optional 原生件未拖垮安装，fail-soft 符合预期）。
+- E5b/c/d 探针在 v0.2.1 内（一次重启验证三步：/api/hello、/api/modules、POST /api/ssh）。**下一重启即验。**
 
 **转正条件**：E5a–f 全绿 + Damon 拍板（路线甲）⇒ ADR-0003 转「已接受」，A' 定案并启动工程实现；E5 任一步失败按降级口径如实重议。
 
