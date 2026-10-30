@@ -1,0 +1,9 @@
+# znCRT bundle patch —— 挂载层：把引擎插件行插入 profile 树
+# 格式依据：dsh-better-sidebar/cordis.patch.yml 先例（dsh.bundle.patch 层，
+# 安装器见 dsh.bundle 声明后 reconcile dsh.profile.bundles 并在 profile 启动时
+# 合并本 patch —— 一条命令安装即挂载）。
+# E5a 挂载失败复盘（2026-10-31）：v0.1.0/0.2.0 缺本文件与 bundle 声明，
+# 安装器按普通依赖处理 ⇒ DSHM 重启后不挂载。v0.2.1 修复。
+- insert:
+    - id: zncrt-engine
+      name: 'zncrt'

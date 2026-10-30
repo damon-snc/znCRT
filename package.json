@@ -1,6 +1,6 @@
 {
   "name": "zncrt",
-  "version": "0.2.0-e5bcd",
+  "version": "0.2.1-e5bcd",
   "description": "znCRT — SSH/SFTP/DB 客户端对标 hexhub（HarmonyOS PC）；E5b/c/d 三合一探针：HTTP 端口 + ssh2/ws 模块解析 + SSH 实弹",
   "type": "module",
   "main": "src/host.js",
@@ -13,6 +13,9 @@
     "ws": "^8.18.0"
   },
   "dsh": {
-    "manifestVersion": 1
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
   }
 }
